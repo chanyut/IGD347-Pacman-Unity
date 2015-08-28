@@ -100,11 +100,114 @@ namespace Pacman {
 			}
 		}
 
+		public StageCell GetStageCellAtPosition(Vector3 position) {
+			Vector3 pos = position - BottomLeftCellPosition;
+			int col = Mathf.FloorToInt(pos.x / Game.Instance.CurrentStage.CellSize);
+			int row = Mathf.FloorToInt(pos.z / Game.Instance.CurrentStage.CellSize);
+			if (col < 0 || col >= mNumberOfColumns) Debug.LogError("Column out of range: " + col);
+			if (row < 0 || row >= mNumberOfRows) Debug.LogError("Row out of range: " + row);
+			return mCells[col, row];
+		}
+
+		public List<StageCell> FindShortestPath(StageCell fromCell, StageCell toCell) {
+
+			// Reset all cell's traversal point
+			for (int c=0; c<mNumberOfColumns; c++) {
+				for (int r=0; r<mNumberOfRows; r++) {
+					mCells[c, r].TraversalPoint = int.MaxValue;
+				}
+			}
+
+			Stack<StageCell> cellStack = new Stack<StageCell>();
+			fromCell.TraversalPoint = 0;
+			cellStack.Push(fromCell);
+
+			// 1. Fill Traversal point until toCell found!
+			while (cellStack.Count > 0) {
+				StageCell cell = cellStack.Pop();
+
+				int v = cell.TraversalPoint + 1;
+
+				if (cell.North != null) {
+					if (cell.North.TraversalPoint > v) {
+						cell.North.TraversalPoint = v;
+						if (cell.North != toCell) {
+							cellStack.Push(cell.North);
+						}
+					}
+				}
+
+				if (cell.East != null) {
+					if (cell.East.TraversalPoint > v) {
+						cell.East.TraversalPoint = v;
+						if (cell.East != toCell) {
+							cellStack.Push(cell.East);
+						}
+					}
+				}
+				
+				if (cell.South != null) {
+					if (cell.South.TraversalPoint > v) {
+						cell.South.TraversalPoint = v;
+						if (cell.South != toCell) {
+							cellStack.Push(cell.South);
+						}
+					}
+				}
+				
+				if (cell.West != null) {
+					if (cell.West.TraversalPoint > v) {
+						cell.West.TraversalPoint = v;
+						if (cell.West != toCell) {
+							cellStack.Push(cell.West);
+						}
+					}
+				}
+			}
+
+			// 2. We won't use cell stack anymore
+			cellStack.Clear();
+			cellStack = null;
+
+			// 3. Traverse back
+			List<StageCell> path = new List<StageCell>();
+			StageCell traverseBackCell = toCell;
+			path.Add(traverseBackCell);
+
+			while (traverseBackCell != fromCell) {
+
+				StageCell[] neightbourCells = new StageCell[] {
+					traverseBackCell.North,
+					traverseBackCell.East,
+					traverseBackCell.South,
+					traverseBackCell.West
+				};
+
+				StageCell minTraversePointCell = null;
+				int minTraversePoint = int.MaxValue;
+				for (int i=0; i<neightbourCells.Length; i++) {
+					if (neightbourCells[i] == null) {
+						continue;
+					}
+					if (neightbourCells[i].TraversalPoint < minTraversePoint) {
+						minTraversePoint = neightbourCells[i].TraversalPoint;
+						minTraversePointCell = neightbourCells[i];
+					}
+				}
+
+				traverseBackCell = minTraversePointCell;
+				path.Add(traverseBackCell);
+			}
+
+			path.Reverse();
+			return path;
+		}
+
 		void OnDrawGizmos() {
 			if (mCells == null) {
 				return;
 			}
-
+			
 			Gizmos.color = Color.green;
 			for (int c=0; c<mNumberOfColumns; c++) {
 				for (int r=0; r<mNumberOfRows; r++) {
@@ -116,11 +219,6 @@ namespace Pacman {
 				}
 			}
 		}
-
-		List<StageCell> FindFindShortestPath(StageCell fromCell, StageCell toCell) {
-			return null;
-		}
-
 	}
 
 }

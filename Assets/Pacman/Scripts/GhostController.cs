@@ -33,11 +33,11 @@ namespace Pacman {
 
 			if (mTimer <= 0) {
 				transform.position = mNextPosition;
+				UpdatePathToPacman();
 
-				int nextPathIndex = mPathIndex + 1;
-				if (nextPathIndex < mPath.Count) {
-					mPathIndex = nextPathIndex;
-					StageCell nextCell = mPath[nextPathIndex];
+				if (mPathIndex < mPath.Count - 1) {
+					mPathIndex += 1;
+					StageCell nextCell = mPath[mPathIndex];
 					mNextPosition = nextCell.Position;
 					Vector3 diff = mNextPosition - transform.position;
 					mMoveDirection = diff.normalized;
@@ -47,9 +47,33 @@ namespace Pacman {
 		}
 
 		void UpdatePathToPacman() {
+			// Find cell where pacman is in
+			Vector3 pacmanPos = Game.Instance.Pacman.transform.position;
+			Vector3 ghostPos = transform.position;
 
+			StageCell pacmanCell = Game.Instance.CurrentStage.GetStageCellAtPosition(pacmanPos);
+			StageCell ghostCell = Game.Instance.CurrentStage.GetStageCellAtPosition(ghostPos);
+
+			List<StageCell> newPath = Game.Instance.CurrentStage.FindShortestPath(ghostCell, pacmanCell);
+			mPath.Clear();
+			mPathIndex = 0;
+			for (int i=0; i<newPath.Count; i++) {
+				mPath.Add(newPath[i]);
+			}
 		}
 
+		void OnDrawGizmos() {
+			if (mPath == null) { 
+				return;
+			}
+
+			Gizmos.color = Color.blue;
+			for (int i=0; i<mPath.Count - 1; i++) {
+				StageCell cell01 = mPath[i];
+				StageCell cell02 = mPath[i + 1];
+				Gizmos.DrawLine(cell01.Position, cell02.Position);
+			}
+		}
 	}
 
 }

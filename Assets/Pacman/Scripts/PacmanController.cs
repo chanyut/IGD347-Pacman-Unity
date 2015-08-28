@@ -14,7 +14,7 @@ namespace Pacman {
 
 		public float MoveSpeed;
 		public PacmanMoveDirection CurrentDirection;
-		public int BlockSize;
+		public Stage CurrentStage;
 
 		PacmanMoveDirection NextDirection;
 		float mTimer;
@@ -40,7 +40,7 @@ namespace Pacman {
 
 			if (mTimer > 0) {
 				mTimer -= Time.deltaTime;
-				transform.position += mMoveDirection * MoveSpeed * BlockSize * Time.deltaTime;
+				transform.position += mMoveDirection * MoveSpeed * CurrentStage.CellSize * Time.deltaTime;
 			}
 			
 			if (mTimer <= 0) {
@@ -61,7 +61,7 @@ namespace Pacman {
 
 				RaycastHit hit;
 				if (!Physics.Raycast( transform.position, nextDir, out hit, 1.5f, 1 << PacmanConstants.LAYER_WALL)) {
-					mNextPosition = transform.position + (nextDir * BlockSize);
+					mNextPosition = transform.position + (nextDir * CurrentStage.CellSize);
 					mMoveDirection = nextDir;
 					CurrentDirection = NextDirection;
 					mTimer = 1 / MoveSpeed;
@@ -69,7 +69,7 @@ namespace Pacman {
 				else {
 					//Debug.Log(string.Format("Cannot go to next direction {0} hit {1}", nextDir, hit.collider.gameObject.name));
 					if (!Physics.Raycast( transform.position, mMoveDirection, out hit, 1.5f, 1 << PacmanConstants.LAYER_WALL)) {
-						mNextPosition = transform.position + (mMoveDirection * BlockSize);
+						mNextPosition = transform.position + (mMoveDirection * CurrentStage.CellSize);
 						mTimer = 1 / MoveSpeed;
 					}
 					else {

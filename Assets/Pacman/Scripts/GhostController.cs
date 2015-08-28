@@ -7,6 +7,12 @@ namespace Pacman {
 
 	public class GhostController : MonoBehaviour {
 
+		public enum GhostModeEnum {
+			Scatter,
+			Frightened,
+			Chase
+		}
+
 		public float MoveSpeed;
 		public Stage CurrentStage;
 

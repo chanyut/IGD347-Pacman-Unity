@@ -100,6 +100,14 @@ namespace Pacman {
 			}
 		}
 
+		public int GetNumberOfColumns() {
+			return mNumberOfColumns;
+		}
+
+		public int GetNumberOfRows() {
+			return mNumberOfRows;
+		}
+
 		public StageCell GetStageCellAtPosition(Vector3 position) {
 			Vector3 pos = position - BottomLeftCellPosition;
 			int col = Mathf.FloorToInt(pos.x / Game.Instance.CurrentStage.CellSize);

@@ -16,6 +16,10 @@ namespace Pacman {
 		public float MoveSpeed;
 		public Stage CurrentStage;
 
+		public GhostModeEnum GhostMode;
+		public float ScatterTime;
+		public float ChasingTime;
+
 		List<StageCell> mPath;
 		int mPathIndex;
 
@@ -29,6 +33,10 @@ namespace Pacman {
 			mTimer = 0.01f;
 			mMoveDirection = Vector3.zero;
 			mPathIndex = 0;
+
+			GhostMode = GhostModeEnum.Scatter;
+
+			UpdatePathToPacman();
 		}
 
 		void Update() {
@@ -36,11 +44,8 @@ namespace Pacman {
 				mTimer -= Time.deltaTime;
 				transform.position += mMoveDirection * MoveSpeed * CurrentStage.CellSize * Time.deltaTime;
 			}
-
-			if (mTimer <= 0) {
+			else {
 				transform.position = mNextPosition;
-				UpdatePathToPacman();
-
 				if (mPathIndex < mPath.Count - 1) {
 					mPathIndex += 1;
 					StageCell nextCell = mPath[mPathIndex];
@@ -48,6 +53,9 @@ namespace Pacman {
 					Vector3 diff = mNextPosition - transform.position;
 					mMoveDirection = diff.normalized;
 					mTimer = 1 / MoveSpeed;
+				}
+				else {
+					UpdatePathToPacman();
 				}
 			}
 		}

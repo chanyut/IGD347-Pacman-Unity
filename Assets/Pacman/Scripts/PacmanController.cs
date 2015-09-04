@@ -56,6 +56,7 @@ namespace Pacman {
 		void OnTriggerEnter(Collider other) {
 			if (other.gameObject.tag == PacmanConstants.TAG_PACDOT) {
 				Destroy(other.gameObject);
+				Game.Instance.IncreaseScore(1);
 			}
 			else if (other.gameObject.tag == PacmanConstants.TAG_GHOST_FRIGHTENED_DOT) {
 				Destroy(other.gameObject);
@@ -68,6 +69,7 @@ namespace Pacman {
 				GhostController ghost = other.gameObject.GetComponent<GhostController>();
 				if (ghost.GhostMode == GhostController.GhostModeEnum.Frightened) {
 					Destroy(other.gameObject);
+					Game.Instance.IncreaseScore(5);
 				}
 				else {
 					Destroy(gameObject);

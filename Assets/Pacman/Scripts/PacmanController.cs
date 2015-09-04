@@ -17,7 +17,7 @@ namespace Pacman {
 		void Start () {
 			Debug.Log("Pacman - Start");
 			mNextPosition = transform.position;
-			mTimer = 0.001f;
+			mTimer = 0f;
 		}
 		
 		// Update is called once per frame
@@ -35,21 +35,20 @@ namespace Pacman {
 			}
 			else {
 				transform.position = mNextPosition;
-				int layerMask = 1 << PacmanConstants.LAYER_WALL;
-				bool isCollided = true;
+				int layerMask = 1 << 8;
+				
 				if (!Physics.Raycast(transform.position, mNextDirection, 1.5f, layerMask)) {
 					mMoveDirection = mNextDirection;
-					isCollided = false;
 				}
-				else {
-					if (!Physics.Raycast(transform.position, mMoveDirection, 1.5f, layerMask)) {
-						isCollided = false;
-					}
+				
+				bool isCollided = false;
+				if (Physics.Raycast(transform.position, mMoveDirection, 1.5f, layerMask)) {
+					isCollided = true;
 				}
 
 				if (!isCollided) { 
 					mNextPosition = transform.position + (mMoveDirection * CurrentStage.CellSize);
-					mTimer = 1 / MoveSpeed;
+					mTimer = CurrentStage.CellSize / (MoveSpeed * CurrentStage.CellSize);
 				}
 			}
 		}

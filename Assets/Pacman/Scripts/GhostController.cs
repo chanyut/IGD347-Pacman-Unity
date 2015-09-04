@@ -52,7 +52,7 @@ namespace Pacman {
 					mNextPosition = nextCell.Position;
 					Vector3 diff = mNextPosition - transform.position;
 					mMoveDirection = diff.normalized;
-					mTimer = 1 / MoveSpeed;
+					mTimer = CurrentStage.CellSize / (MoveSpeed * CurrentStage.CellSize);
 				}
 				else {
 					UpdatePathToPacman();

@@ -39,44 +39,43 @@ namespace Pacman {
 				}
 			}
 
-			// Link cells
+			UpdateCellNeightbours();
+		}
+
+		void UpdateCellNeightbours() {
 			for (int c=0; c<mNumberOfColumns; c++) {
 				for (int r=0; r<mNumberOfRows; r++) {
 					StageCell cell = mCells[c, r];
-
+					
 					// link north cell
 					if (r + 1 < mNumberOfRows) {
 						StageCell northCell = mCells[c, r + 1];
-						bool canConnect = CheckCellConnection(cell, northCell);
-						if (canConnect) {
+						if (CheckCellConnection(cell, northCell)) {
 							cell.North = northCell;
 						}
 					}
-
+					
 					// link south cell
 					if (r - 1 >= 0) {
 						StageCell southCell = mCells[c, r - 1];
-						bool canConnect = CheckCellConnection(cell, southCell);
-						if (canConnect) {
+						if (CheckCellConnection(cell, southCell)) {
 							cell.South = southCell;
 						}
 					}
-
+					
+					// link east cell
+					if (c + 1 < mNumberOfRows) {
+						StageCell eastCell = mCells[c + 1, r];
+						if (CheckCellConnection(cell, eastCell)) {
+							cell.East = eastCell;
+						}
+					}
+					
 					// link west cell
 					if (c - 1 >= 0) {
 						StageCell westCell = mCells[c - 1, r];
-						bool canConnect = CheckCellConnection(cell, westCell);
-						if (canConnect) {
+						if (CheckCellConnection(cell, westCell)) {
 							cell.West = westCell;
-						}
-					}
-
-					// link east cell
-					if (c + 1 < mNumberOfColumns) {
-						StageCell eastCell = mCells[c + 1, r];
-						bool canConnect = CheckCellConnection(cell, eastCell);
-						if (canConnect) {
-							cell.East = eastCell;
 						}
 					}
 				}
@@ -91,8 +90,7 @@ namespace Pacman {
 			Vector3 direction = diff.normalized;
 			float distance = diff.magnitude;
 
-			RaycastHit hit;
-			if (Physics.Raycast(origin, direction, out hit, distance, 1 << PacmanConstants.LAYER_WALL)) {
+			if (Physics.Raycast(origin, direction, distance, 1 << PacmanConstants.LAYER_WALL)) {
 				return false;
 			}
 			else {

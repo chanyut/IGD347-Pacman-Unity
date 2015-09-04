@@ -14,5 +14,4 @@ namespace Pacman {
 		public int TraversalPoint;
 
 	}
-
 }

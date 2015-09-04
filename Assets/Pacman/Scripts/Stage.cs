@@ -115,6 +115,12 @@ namespace Pacman {
 			return mCells[col, row];
 		}
 
+		public StageCell GetStageCellAt(int col, int row) {
+			if (col < 0 || col >= mNumberOfColumns) Debug.LogError("Column out of range: " + col);
+			if (row < 0 || row >= mNumberOfRows) Debug.LogError("Row out of range: " + row);
+			return mCells[col, row];
+		}
+
 		public List<StageCell> FindShortestPath(StageCell fromCell, StageCell toCell) {
 
 			// Reset all cell's traversal point

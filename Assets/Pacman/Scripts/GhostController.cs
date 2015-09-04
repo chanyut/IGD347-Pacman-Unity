@@ -19,6 +19,11 @@ namespace Pacman {
 		public GhostModeEnum GhostMode;
 		public float ScatterTime;
 		public float ChasingTime;
+		public float FrightenedTime;
+
+		public GameObject GhostSphere;
+		public Material NormalMaterial;
+		public Material FrightenedMaterial;
 
 		List<StageCell> mPath;
 		int mPathIndex;
@@ -26,6 +31,7 @@ namespace Pacman {
 		Vector3 mNextPosition;
 		Vector3 mMoveDirection;
 		float mTimer;
+		float mFrightenedTimer;
 
 		void Start() {
 			mPath = new List<StageCell>();
@@ -34,33 +40,67 @@ namespace Pacman {
 			mMoveDirection = Vector3.zero;
 			mPathIndex = 0;
 
-			GhostMode = GhostModeEnum.Scatter;
+			GhostMode = GhostModeEnum.Chase;
 
 			UpdatePathToPacman();
 		}
 
 		void Update() {
-			if (mTimer > 0) {
-				mTimer -= Time.deltaTime;
-				transform.position += mMoveDirection * MoveSpeed * CurrentStage.CellSize * Time.deltaTime;
-			}
-			else {
-				transform.position = mNextPosition;
-				if (mPathIndex < mPath.Count - 1) {
-					mPathIndex += 1;
-					StageCell nextCell = mPath[mPathIndex];
-					mNextPosition = nextCell.Position;
-					Vector3 diff = mNextPosition - transform.position;
-					mMoveDirection = diff.normalized;
-					mTimer = CurrentStage.CellSize / (MoveSpeed * CurrentStage.CellSize);
+			if (GhostMode == GhostModeEnum.Chase) {
+				if (mTimer > 0) {
+					mTimer -= Time.deltaTime;
+					transform.position += mMoveDirection * MoveSpeed * CurrentStage.CellSize * Time.deltaTime;
 				}
 				else {
+					transform.position = mNextPosition;
+					
 					UpdatePathToPacman();
+					if (mPathIndex < mPath.Count - 1) {
+						mPathIndex += 1;
+						StageCell nextCell = mPath[mPathIndex];
+						mNextPosition = nextCell.Position;
+						Vector3 diff = mNextPosition - transform.position;
+						mMoveDirection = diff.normalized;
+						mTimer = CurrentStage.CellSize / (MoveSpeed * CurrentStage.CellSize);
+					}
 				}
+			}
+			else if (GhostMode == GhostModeEnum.Frightened) {
+				mFrightenedTimer += Time.deltaTime;
+				if (mFrightenedTimer >= FrightenedTime) {
+					ChangeGhostMode(GhostModeEnum.Chase);
+					return;
+				}
+
+				if (mTimer > 0) {
+					mTimer -= Time.deltaTime;
+					transform.position += mMoveDirection * MoveSpeed * CurrentStage.CellSize * Time.deltaTime;
+				}
+				else {
+					transform.position = mNextPosition;
+					if (mPathIndex < mPath.Count - 1) {
+						mPathIndex += 1;
+						StageCell nextCell = mPath[mPathIndex];
+						mNextPosition = nextCell.Position;
+						Vector3 diff = mNextPosition - transform.position;
+						mMoveDirection = diff.normalized;
+						mTimer = CurrentStage.CellSize / (MoveSpeed * CurrentStage.CellSize);
+					}
+					else {
+						UpdatePathToGetAway();
+					}
+				}
+			}
+			else if (GhostMode == GhostModeEnum.Scatter) {
+				// Assignment
 			}
 		}
 
 		void UpdatePathToPacman() {
+			if (Game.Instance.Pacman == null) {
+				return;
+			}
+
 			// Find cell where pacman is in
 			Vector3 pacmanPos = Game.Instance.Pacman.transform.position;
 			Vector3 ghostPos = transform.position;
@@ -73,6 +113,42 @@ namespace Pacman {
 			mPathIndex = 0;
 			for (int i=0; i<newPath.Count; i++) {
 				mPath.Add(newPath[i]);
+			}
+		}
+
+		void UpdatePathToGetAway() {
+			Vector3 ghostPos = transform.position;
+			StageCell ghostCell = Game.Instance.CurrentStage.GetStageCellAtPosition(ghostPos);
+
+			int numberOfColumns = Game.Instance.CurrentStage.GetNumberOfColumns();
+			int numberOfRows = Game.Instance.CurrentStage.GetNumberOfRows();
+			int col = Random.Range(0, numberOfColumns - 1);
+			int row = Random.Range(0, numberOfRows - 1);
+			StageCell targetCell = Game.Instance.CurrentStage.GetStageCellAt(col, row);
+
+			List<StageCell> newPath = Game.Instance.CurrentStage.FindShortestPath(ghostCell, targetCell);
+			mPath.Clear();
+			mPathIndex = 0;
+			for (int i=0; i<newPath.Count; i++) {
+				mPath.Add(newPath[i]);
+			}
+		}
+
+		public void ChangeGhostMode(GhostModeEnum newMode) {
+			if (GhostMode != newMode) {
+
+				if (newMode == GhostModeEnum.Chase) {
+					GhostSphere.GetComponent<Renderer>().sharedMaterial = NormalMaterial;
+				}
+				else if (newMode == GhostModeEnum.Frightened) {
+					GhostSphere.GetComponent<Renderer>().sharedMaterial = FrightenedMaterial;
+					mFrightenedTimer = 0;
+				}
+				else if (newMode == GhostModeEnum.Scatter) {
+
+				}
+
+				GhostMode = newMode;
 			}
 		}
 

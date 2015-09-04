@@ -57,6 +57,22 @@ namespace Pacman {
 			if (other.gameObject.tag == PacmanConstants.TAG_PACDOT) {
 				Destroy(other.gameObject);
 			}
+			else if (other.gameObject.tag == PacmanConstants.TAG_GHOST_FRIGHTENED_DOT) {
+				Destroy(other.gameObject);
+				for (int i=0; i<Game.Instance.Ghosts.Length; i++) {
+					GhostController ghost = Game.Instance.Ghosts[i];
+					ghost.ChangeGhostMode(GhostController.GhostModeEnum.Frightened);
+				}
+			}
+			else if (other.gameObject.tag == PacmanConstants.TAG_GHOST) {
+				GhostController ghost = other.gameObject.GetComponent<GhostController>();
+				if (ghost.GhostMode == GhostController.GhostModeEnum.Frightened) {
+					Destroy(other.gameObject);
+				}
+				else {
+					Destroy(gameObject);
+				}
+			}
 		}
 	}
 }
